@@ -1,0 +1,239 @@
+.r-header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #34495E;
+    height: 60px;
+    text-align: center;
+    font-family: "Open-Bold";
+    color: rgba(255, 255, 255, 0.6);
+    z-index: 1;
+}
+.r-header h2 {
+    margin: 12px 0;
+}
+.r-logo {
+    opacity: 0.3;
+}
+.flex-control-nav {
+    text-align: center;
+}
+.flex-control-nav li {
+    margin: 0 6px;
+    display: inline-block;
+    zoom: 1;
+}
+.flex-control-paging li a.flex-active {
+    cursor: default;
+    background-color: #16a085;
+    border-color: #16a085;
+    text-decoration: none;
+}
+.flex-control-paging li a {
+    background: white;
+    border: 5px solid #d7dce0;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+    line-height: 16px;
+    margin: 7px 2px 6px;
+    padding: 0 4px;
+    -webkit-transition: background 0.2s ease-out, border-color 0s ease-out, color 0.2s ease-out;
+    -moz-transition: background 0.2s ease-out, border-color 0s ease-out, color 0.2s ease-out;
+    -o-transition: background 0.2s ease-out, border-color 0s ease-out, color 0.2s ease-out;
+    transition: background 0.2s ease-out, border-color 0s ease-out, color 0.2s ease-out;
+    -webkit-backface-visibility: hidden;
+}
+.flex-viewport {
+    margin-bottom: -10px;
+}
+.slides, .flex-control-nav, .flex-direction-nav {
+    float: none;
+    left: 4px;
+    list-style: outside none none;
+    margin: 15px 0 0;
+    padding: 0;
+    position: relative;
+    top: 45px;
+}
+.flex-direction-nav .flex-prev {
+    left: -36px;
+}
+.flex-direction-nav a {
+    width: 30px;
+    height: 30px;
+    margin: -20px 0 0;
+    display: block;
+    background: url(../images/bg_direction_nav.png) no-repeat 0 0;
+    position: absolute;
+    top: 50%;
+    cursor: pointer;
+    text-indent: -9999px;
+    opacity: 0;
+    -webkit-transition: all .3s ease;
+}
+.flexslider:hover .flex-next {
+    opacity: 0.8;
+    right: 5px;
+}
+.flex-direction-nav .flex-next {
+    background-position: 100% 0;
+    right: -36px;
+}
+/*
+ * jQuery Flex.list-wrapper {
+margin: 6px auto;
+width: 300px;
+} v2.0
+ * http://www.woothemes.com/flexslider/
+ *
+ * Copyright 2012 WooThemes
+ * Free to use under the GPLv2 license.
+ * http://www.gnu.org/licenses/gpl-2.0.html
+ *
+ * Contributing author: Tyler Smith (@mbmufffin)
+ */
+
+/* Browser Resets */
+
+.flex-container a:active, .flexslider a:active, .flex-container a:focus, .flexslider a:focus {
+    outline: none;
+}
+.slides, .flex-control-nav, .flex-direction-nav {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+/* FlexSlider Necessary Styles
+*********************************/
+
+.flexslider {
+    margin: 0;
+    padding: 0;
+}
+.flexslider .slides > li {
+    display: none;
+    -webkit-backface-visibility: hidden;
+}
+/* Hide the slides before the JS is loaded. Avoids image jumping */
+
+.flexslider .slides img {
+    width: 100%;
+    display: block;
+}
+.flex-pauseplay span {
+    text-transform: capitalize;
+}
+/* Clearfix for the .slides element */
+
+.slides:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+html[xmlns] .slides {
+    display: block;
+}
+* html .slides {
+    height: 1%;
+}
+.opt-list {
+	padding-left: 0;
+}
+#options {
+    padding: 3px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 2;
+    padding: 1rem;
+    color: white;
+}
+.opt-list {
+    background: white none repeat scroll 0 0;
+    border: 1px solid;
+    border-radius: 3px;
+    position: fixed;
+    right: 15px;
+    top: 50px;
+    width: 100px;
+    z-index: 2;
+}
+.opt-list a {
+    border-bottom: 1px solid;
+    display: block;
+    padding: 10px;
+}
+#rplayer {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: white;
+    z-index: 3;
+}
+#rplayer .cont {
+    padding: 40px;
+}
+#rplayer .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 15px;
+    display: inline-block
+}
+#rplayer button {
+    margin: 3% 4%;
+    padding: 20px;
+    width: 40%;
+}
+.video.slides {
+    float: none;
+    left: 4px;
+    list-style: outside none none;
+    margin: 15px 0 0;
+    padding: 0;
+    position: relative;
+    top: 45px;
+}
+.video .tile {
+    background-color: #ecf0f5;
+    border-radius: 6px;
+    margin: 16px;
+    padding: 14px;
+    position: relative;
+    text-align: center;
+}
+.google .watch {
+    width: 60%;
+    display: inline-block;
+    margin: 0;
+}
+.block .queue {
+    display: none;
+}
+.google .queue {
+    display: inline-block;
+    margin: 0;
+    width: 30%;
+}
+.list-wrapper {
+    margin: 6px auto;
+    width: 300px;
+}
+.slider {
+    margin-top: 44px;
+}
+.r-container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background-color: rgba(0, 0, 0, 0.9);
+	z-index: 4;
+}
