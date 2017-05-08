@@ -39,6 +39,19 @@
 	            </li>
 	        </ul>
 	    </div>
+        <div class="list2" ng-controller="MyRelVideos">
+            <h3 ng-if="videos.length">{{name}}</h3>
+            <ul class="video-list-wrap clearfix" ng-if="videos.length">
+                <li class="block" tabindex="0" data-id="{{video.id}}" ng-repeat="(index, video) in videos">
+                    <div class="tile">
+                        <img class="tile-image big-illustration" src="{{video.img}}">
+                        <h4 class="tile-title">{{index + 1}}. {{video.title}}</h4>
+                        <p class="dur-txt">{{video.duration}}</span>
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </div>
     </div>
     <div class="container">
         <div id="loader" class="status fadeInDown animated hidden">Y</div>

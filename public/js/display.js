@@ -1,8 +1,13 @@
 var myApp = angular.module('myApp', ['ngRoute']);
 var recentVideosScope;
+var relatedVideosScope;
 var currentPlaylistIndex = 0;
 var loadCount = 0;
 var videoInfo = {};
+myApp.controller('MyRelVideos', ['$scope', function ($scope) {
+    $scope.name = 'Related Videos';
+    relatedVideosScope = $scope;
+}]);
 myApp.controller('MyVideos', ['$scope', function ($scope) {
     $scope.name = 'Recent Videos';
     recentVideosScope = $scope;
@@ -14,16 +19,17 @@ myApp.controller('MyVideos', ['$scope', function ($scope) {
     // }];
     // $scope.videos = videos;
 }]);
+
 window.onLoadCallback = function () {
     console.log("Google API Loaded");
 }
 
-function search(q, callback) {
+function search(q, count, callback) {
     gapi.client.setApiKey('AIzaSyAfxyAv_fgiacWErpsdj0S4tCprFqIdVAA');
     gapi.client.load('youtube', 'v3').then(function () {
         var request = gapi.client.youtube.search.list({
             q: q,
-            maxResults: 1,
+            maxResults: count,
             part: 'snippet'
         });
 
@@ -165,7 +171,7 @@ socket.on('controlling', function (data) {
             title: "",
             duration: ""
         };
-    	search(videoId, function (resp) {
+    	search(videoId, 1, function (resp) {
             var item = resp.items[0];
             video.img =  item.snippet.thumbnails.medium.url;
             video.title =  item.snippet.title;
@@ -188,7 +194,7 @@ socket.on('controlling', function (data) {
 	            title: "",
 	            duration: ""
 	        };
-	    	search(videoId, function (resp) {
+	    	search(videoId, 1, function (resp) {
 	            var item = resp.items[0];
 	            video.img =  item.snippet.thumbnails.medium.url;
 	            video.title =  item.snippet.title;
@@ -201,20 +207,51 @@ socket.on('controlling', function (data) {
     	}
         videos.push(video);
     }
+    function showRelatedVideos(videoId) {
+        var relVideos = [];
+        relatedVideosScope.videos = relVideos;
+        search(videoId, 50, function (resp) {
+            var i,
+                item,
+                video,
+                items = resp.items,
+                len = items.length;
+            for (i = 0; i < len; i++) {
+                item = resp.items[i];
+                if (item.id.videoId) {
+                    video = {
+                        id: item.id.videoId,
+                        img: item.snippet.thumbnails.medium.url,
+                        title: item.snippet.title
+                    }
+                    getContentList(videoId, function (resp) {
+                        video.duration = resp.items[0].contentDetails.duration.replace("PT", "").replace("H", "H:").replace("M", "M:").replace("S", "S");
+                        relVideos.push(video);
+                        relatedVideosScope.$apply();
+                        videoInfo[videoId] = video;
+                    });
+                }
+            }
+        });
+    }
     function loadPlayList() {
+        var selChild,
+            videoId;
     	if (loadCount === 0) {
     		recentVideosScope.$apply();
-	    	var selChild;
 			YTPlayer.pauseVideo();
 	    	$("#playlist").removeClass("hide");
 	    	if (window.videoId) {
+                videoId = window.videoId;
 	    		selChild =  $(".video-list-wrap .block[data-id='" + window.videoId + "']").focus();
-	    		selChild[0].scrollIntoView();
+	    		selChild[0].scrollIntoView({block: "end", behavior: "smooth"});
 	        	currentPlaylistIndex = $(".video-list-wrap .block").index(selChild);
 	        } else {
 	        	currentPlaylistIndex = 0;
-	        	$(".video-list-wrap .block").first().focus();
+                selChild = $(".video-list-wrap .block").first().focus();
+	        	videoId = selChild.data("id");
 	        }
+            showRelatedVideos(videoId);
 	    } else {
 	    	setTimeout(function () {
 	    		loadPlayList();
