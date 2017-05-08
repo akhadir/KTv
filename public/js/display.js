@@ -1,9 +1,11 @@
-var myApp = angular.module('myApp', ['ngRoute']);
-var recentVideosScope;
-var relatedVideosScope;
-var currentPlaylistIndex = 0;
-var loadCount = 0;
-var videoInfo = {};
+var myApp = angular.module('myApp', ['ngRoute']),
+    recentVideosScope,
+    relatedVideosScope,
+    currentPlaylistIndex = 0,
+    recentFocusFlag = true,
+    loadCount = 0,
+    videoInfo = {};
+
 myApp.controller('MyRelVideos', ['$scope', function ($scope) {
     $scope.name = 'Related Videos';
     relatedVideosScope = $scope;
@@ -72,7 +74,9 @@ socket.on('connect', function (data) {
 });
 
 socket.on('controlling', function (data) {
-    var current = $(".selected");
+    var current = $(".selected"),
+        index,
+        videoId;
     if (data.action === "goLeft") {
        if ($("#playlist").hasClass("hide")) {
 	        $(".selected").removeClass("selected");
@@ -82,10 +86,20 @@ socket.on('controlling', function (data) {
 	            $(current).prev().addClass("selected");
 	        }
 	    } else {
-	    	if (currentPlaylistIndex) {
-	    	 	$(".video-list-wrap .block")[--currentPlaylistIndex].focus();
-	    	}
+	    	// if (currentPlaylistIndex) {
+	    	//  	$(".video-list-wrap .block")[--currentPlaylistIndex].focus();
+	    	// }
+            if ($(document.activeElement).prev().length) {
+                $(document.activeElement).prev().focus();
+            }
 	    }
+    } else if (data.action === "swipeUp") {
+        recentFocusFlag = true;
+        currentPlaylistIndex = 0;
+        $(".list1 .block").first().focus();
+    } else if (data.action === "swipeDown") {
+        recentFocusFlag = false;
+        $(".list2 .block").first().focus();
     } else if (data.action === "goRight") {
     	if ($("#playlist").hasClass("hide")) {
 	        $(".selected").removeClass("selected");
@@ -95,14 +109,25 @@ socket.on('controlling', function (data) {
 	            $(current).next().addClass("selected");
 	        }
 	    } else {
-	    	if (currentPlaylistIndex >= 0 && currentPlaylistIndex  < $(".video-list-wrap .block").length - 1 ) {
-	    	 	$(".video-list-wrap .block")[++currentPlaylistIndex].focus();
-	    	}
+	    	// if (currentPlaylistIndex >= 0 && currentPlaylistIndex  < $(".video-list-wrap .block").length - 1 ) {
+	    	//  	$(".video-list-wrap .block")[++currentPlaylistIndex].focus();
+	    	// }
+            if ($(document.activeElement).next().length) {
+                $(document.activeElement).next().focus();
+            }
+
 	    }
     } else if (data.action === "enter") {
     	hidePlayList();
     	YTPlayer.stopVideo();
-        playVideoByIndex("player", currentPlaylistIndex);
+        activeEle = $(document.activeElement);
+        if (recentFocusFlag) {
+            index = $(".video-list-wrap .block").index(activeEle);
+            playVideoByIndex("player", index);
+        } else {
+            recentFocusFlag = true;
+            playVideo("player", activeEle.data("id"));
+        }
     } else if (data.action === "playVideo") {
     	hidePlayList();
     	setVideoInfo(data.id);
@@ -194,6 +219,7 @@ socket.on('controlling', function (data) {
     function loadQueuedVideoInfo(i, videos) {
     	var video,
     		videoId = queuedList[i];
+        YTPlayer.pauseVideo();
     	if (videoInfo[videoId]) {
     		video = videoInfo[videoId];
     		loadCount--;
@@ -250,13 +276,14 @@ socket.on('controlling', function (data) {
             videoId;
     	if (loadCount === 0) {
     		recentVideosScope.$apply();
-			YTPlayer.pauseVideo();
 	    	$("#playlist").removeClass("hide");
 	    	if (window.videoId) {
                 videoId = window.videoId;
-	    		selChild =  $(".video-list-wrap .block[data-id='" + window.videoId + "']").focus();
-	    		selChild[0].scrollIntoView({block: "end", behavior: "smooth"});
-	        	currentPlaylistIndex = $(".video-list-wrap .block").index(selChild);
+	    		currentPlaylistIndex =  window.getCurrentIndex();
+                selChild = $(".video-list-wrap .block").eq(currentPlaylistIndex).focus();
+	    		if (selChild.length) {
+                    selChild[0].scrollIntoView({block: "end", behavior: "smooth"});
+                }
 	        } else {
 	        	currentPlaylistIndex = 0;
                 selChild = $(".video-list-wrap .block").first().focus();
