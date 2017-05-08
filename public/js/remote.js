@@ -158,13 +158,15 @@ window.onLoadCallback = function() {
                     }
                 });
             }
-            $$(".r-container").swipeUp(function(){
-                $(".r-container").addClass("hide");
-                socket.emit('controll',{action:"player-play"}); 
-            });
-            $$(".r-container").swipeDown(function(){
+            $$(".r-container").tap(function () {
                 $(".r-container").addClass("hide");
                 socket.emit('controll',{action:"enter"}); 
+            });
+            $$(".r-container").swipeUp(function(){
+                socket.emit('controll',{action:"swipeUp"}); 
+            });
+            $$(".r-container").swipeDown(function(){
+                socket.emit('controll',{action:"swipeDown"}); 
             });
             $$(".r-container").swipeLeft(function(){
                 socket.emit('controll',{action:"swipeLeft"}); 

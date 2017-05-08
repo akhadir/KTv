@@ -24,15 +24,25 @@ window.onLoadCallback = function () {
     console.log("Google API Loaded");
 }
 
-function search(q, count, callback) {
+function search(q, related, callback) {
+    var count = related ? 50 : 1;
     gapi.client.setApiKey('AIzaSyAfxyAv_fgiacWErpsdj0S4tCprFqIdVAA');
     gapi.client.load('youtube', 'v3').then(function () {
-        var request = gapi.client.youtube.search.list({
-            q: q,
-            maxResults: count,
-            part: 'snippet'
-        });
-
+        var request;
+        if (!related) {
+            request = gapi.client.youtube.search.list({
+                q: q,
+                maxResults: count,
+                part: 'snippet'
+            });
+        } else {
+            request = gapi.client.youtube.search.list({
+                relatedToVideoId: q,
+                maxResults: count,
+                part: 'snippet',
+                type: 'video'
+            });
+        }
         request.execute(function (response) {
             callback(response);
         });
@@ -171,7 +181,7 @@ socket.on('controlling', function (data) {
             title: "",
             duration: ""
         };
-    	search(videoId, 1, function (resp) {
+    	search(videoId, false, function (resp) {
             var item = resp.items[0];
             video.img =  item.snippet.thumbnails.medium.url;
             video.title =  item.snippet.title;
@@ -194,7 +204,7 @@ socket.on('controlling', function (data) {
 	            title: "",
 	            duration: ""
 	        };
-	    	search(videoId, 1, function (resp) {
+	    	search(videoId, false, function (resp) {
 	            var item = resp.items[0];
 	            video.img =  item.snippet.thumbnails.medium.url;
 	            video.title =  item.snippet.title;
@@ -210,7 +220,7 @@ socket.on('controlling', function (data) {
     function showRelatedVideos(videoId) {
         var relVideos = [];
         relatedVideosScope.videos = relVideos;
-        search(videoId, 50, function (resp) {
+        search(videoId, true, function (resp) {
             var i,
                 item,
                 video,
@@ -224,9 +234,10 @@ socket.on('controlling', function (data) {
                         img: item.snippet.thumbnails.medium.url,
                         title: item.snippet.title
                     }
+                    relVideos.push(video);
+                    relatedVideosScope.$apply();
                     getContentList(videoId, function (resp) {
                         video.duration = resp.items[0].contentDetails.duration.replace("PT", "").replace("H", "H:").replace("M", "M:").replace("S", "S");
-                        relVideos.push(video);
                         relatedVideosScope.$apply();
                         videoInfo[videoId] = video;
                     });
