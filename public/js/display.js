@@ -32,10 +32,10 @@ function search(q, related, callback) {
     gapi.client.load('youtube', 'v3').then(function () {
         var request;
         if (!related) {
-            request = gapi.client.youtube.search.list({
-                q: q,
-                maxResults: count,
-                part: 'snippet'
+            request = gapi.client.youtube.videos.list({
+                id: q,
+                // maxResults: count,
+                part: 'snippet,contentDetails'
             });
         } else {
             request = gapi.client.youtube.search.list({
@@ -75,6 +75,7 @@ socket.on('connect', function (data) {
 
 socket.on('controlling', function (data) {
     var current = $(".selected"),
+        activeEle,
         index,
         videoId;
     if (data.action === "goLeft") {
@@ -118,9 +119,9 @@ socket.on('controlling', function (data) {
 
 	    }
     } else if (data.action === "enter") {
+        activeEle = $(document.activeElement);
     	hidePlayList();
     	YTPlayer.stopVideo();
-        activeEle = $(document.activeElement);
         if (recentFocusFlag) {
             index = $(".video-list-wrap .block").index(activeEle);
             playVideoByIndex("player", index);
@@ -184,68 +185,64 @@ socket.on('controlling', function (data) {
     	hidePlayList();
         window.nextVideo();
     } else if (data.action === "player-qlist") {
-        var queuedList = window.getQueuedList(),
-        	selChild,
-        	videos = [],
-        	len = queuedList.length,
-        	i;
-        loadCount = 0;
-        recentVideosScope.videos = videos;
-        for (i = 0; i < len; i++) {
-        	loadCount++;
-        	loadQueuedVideoInfo(i, videos);
-        }
-        if (len) {
-        	loadPlayList();
-        }
-    }
-    function setVideoInfo (videoId) {
-    	var video = video = {
-            id: videoId,
-            img: "",
-            title: "",
-            duration: ""
-        };
-    	search(videoId, false, function (resp) {
-            var item = resp.items[0];
-            video.img =  item.snippet.thumbnails.medium.url;
-            video.title =  item.snippet.title;
-	        getContentList(videoId, function (resp) {
-                video.duration = resp.items[0].contentDetails.duration.replace("PT", "").replace("H", "H:").replace("M", "M:").replace("S", "S");
-	        	videoInfo[videoId] = video;
-            });
+        var queuedList = window.getQueuedList();
+        YTPlayer.pauseVideo();
+    	loadVideoInfo(queuedList, function (videos) {
+            recentVideosScope.videos = videos;
+            loadPlayList();
         });
     }
-    function loadQueuedVideoInfo(i, videos) {
+    function setVideoInfo (videoId) {
+    	// search(videoId, false, function (resp) {
+     //        var item = resp.items[0],
+     //        video = {
+     //            id: videoId,
+     //            img: item.snippet.thumbnails.medium.url,
+     //            title: item.snippet.title,
+     //            duration: resp.items[0].contentDetails.duration.replace("PT", "").replace("H", "H:").replace("M", "M:").replace("S", "S")
+     //        };
+     //        videoInfo[videoId] = video;
+     //    });
+    }
+    function loadVideoInfo(videoList, callback) {
     	var video,
-    		videoId = queuedList[i];
-        YTPlayer.pauseVideo();
-    	if (videoInfo[videoId]) {
-    		video = videoInfo[videoId];
-    		loadCount--;
-    	} else {
-    		video = {
-	            id: videoId,
-	            img: "",
-	            title: "",
-	            duration: ""
-	        };
-	    	search(videoId, false, function (resp) {
-	            var item = resp.items[0];
-	            video.img =  item.snippet.thumbnails.medium.url;
-	            video.title =  item.snippet.title;
-		        getContentList(videoId, function (resp) {
-	                video.duration = resp.items[0].contentDetails.duration.replace("PT", "").replace("H", "H:").replace("M", "M:").replace("S", "S");
-		        	videoInfo[videoId] = video;
-		        	loadCount--;
-	            });
-	        });
-    	}
-        videos.push(video);
+            i,
+            len = videoList.length,
+            videos = [],
+            pendingVideos = videoList,
+            pendingVideosStr,
+    		videoId;
+        // for (i = 0; i < len; i++) {
+        //     videoId = videoList[i];
+        // 	if (videoInfo[videoId]) {
+        // 		video = videoInfo[videoId];
+        //         videos.push(video);
+        // 	} else {
+        // 		pendingVideos.push(videoId);
+        // 	}
+        // }
+        if (pendingVideos.length) {
+            pendingVideosStr = pendingVideos.join(",");
+            search(pendingVideosStr, false, function (resp) {
+                var item;
+                for (i = 0; i < len; i++) {
+                    item = resp.items[i];
+                    video = {
+                        id: item.id.videoId ? item.id.videoId : item.id,
+                        img: item.snippet.thumbnails.medium.url,
+                        title: item.snippet.title,
+                        duration: item.contentDetails.duration.replace("PT", "").replace("H", "H:").replace("M", "M:").replace("S", "S")
+                    };
+                    videoInfo[videoId] = video;
+                    videos.push(video);
+                }
+                callback(videos);
+            });
+        }        
     }
     function showRelatedVideos(videoId) {
-        var relVideos = [];
-        relatedVideosScope.videos = relVideos;
+        var relVideos = [],
+            pendingVideos = [];
         search(videoId, true, function (resp) {
             var i,
                 item,
@@ -255,45 +252,32 @@ socket.on('controlling', function (data) {
             for (i = 0; i < len; i++) {
                 item = resp.items[i];
                 if (item.id.videoId) {
-                    video = {
-                        id: item.id.videoId,
-                        img: item.snippet.thumbnails.medium.url,
-                        title: item.snippet.title
-                    }
-                    relVideos.push(video);
-                    relatedVideosScope.$apply();
-                    getContentList(videoId, function (resp) {
-                        video.duration = resp.items[0].contentDetails.duration.replace("PT", "").replace("H", "H:").replace("M", "M:").replace("S", "S");
-                        relatedVideosScope.$apply();
-                        videoInfo[videoId] = video;
-                    });
+                    pendingVideos.push(item.id.videoId);
                 }
             }
+            loadVideoInfo(pendingVideos, function (videos) {
+                relatedVideosScope.videos = videos;
+                relatedVideosScope.$apply();
+            });
         });
     }
     function loadPlayList() {
         var selChild,
             videoId;
-    	if (loadCount === 0) {
-    		recentVideosScope.$apply();
-	    	$("#playlist").removeClass("hide");
-	    	if (window.videoId) {
-                videoId = window.videoId;
-	    		currentPlaylistIndex =  window.getCurrentIndex();
-                selChild = $(".video-list-wrap .block").eq(currentPlaylistIndex).focus();
-	    		if (selChild.length) {
-                    selChild[0].scrollIntoView({block: "end", behavior: "smooth"});
-                }
-	        } else {
-	        	currentPlaylistIndex = 0;
-                selChild = $(".video-list-wrap .block").first().focus();
-	        	videoId = selChild.data("id");
-	        }
-            showRelatedVideos(videoId);
-	    } else {
-	    	setTimeout(function () {
-	    		loadPlayList();
-	    	}, 1000);
-	    }
+		recentVideosScope.$apply();
+    	$("#playlist").removeClass("hide");
+    	if (window.videoId) {
+            videoId = window.videoId;
+    		currentPlaylistIndex =  window.getCurrentIndex();
+            selChild = $(".video-list-wrap .block").eq(currentPlaylistIndex).focus();
+    		if (selChild.length) {
+                selChild[0].scrollIntoView({block: "end", behavior: "smooth"});
+            }
+        } else {
+        	currentPlaylistIndex = 0;
+            selChild = $(".video-list-wrap .block").first().focus();
+        	videoId = selChild.data("id");
+        }
+        showRelatedVideos(videoId);
     }
 })

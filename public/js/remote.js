@@ -174,7 +174,7 @@ window.onLoadCallback = function() {
             $$(".r-container").swipeRight(function(){
                 socket.emit('controll',{action:"swipeRight"}); 
             });
-            $(".player-qlist").on("click", function () {
+            $(".player-qlist").off("click").on("click", function () {
                 $(".r-container").removeClass("hide");
                 socket.emit('controll',{action:"player-qlist"}); 
                 // $.getJSON("/getQueuedList", function(result){
