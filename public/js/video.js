@@ -54,7 +54,10 @@
             YTPlayer.cueVideoById({videoId: videoId});
             YTPlayer.setPlaybackQuality("medium");
             YTPlayer.playVideo();
+        } else {
+            return false;
         }
+        return true;
     }
     function playPrev() {
         if (currentIndex > 0) {
@@ -67,11 +70,15 @@
         }
     }
     function onPlayerStateChange(event) {
+        var playStatus;
         if (event.data == YT.PlayerState.PLAYING && !done) {
             //setTimeout(stopVideo, 6000);
             done = true;
         } else if (event.data == YT.PlayerState.ENDED) {
-            playNext();
+            playStatus = playNext();
+            if (playStatus === false && window.onVideoEnd) {
+                window.onVideoEnd(window.videoId);
+            }
         }
     }
     window.playVideoByIndex = function (nodeId, index) {

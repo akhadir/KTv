@@ -121,7 +121,9 @@ socket.on('controlling', function (data) {
     } else if (data.action === "enter") {
         activeEle = $(document.activeElement);
     	hidePlayList();
-    	YTPlayer.stopVideo();
+        if (YTPlayer) {
+            YTPlayer.stopVideo();
+        }
         if (recentFocusFlag) {
             index = $(".video-list-wrap .block").index(activeEle);
             playVideoByIndex("player", index);
@@ -185,9 +187,12 @@ socket.on('controlling', function (data) {
     	hidePlayList();
         window.nextVideo();
     } else if (data.action === "player-qlist") {
-        var queuedList = window.getQueuedList();
         YTPlayer.pauseVideo();
-    	loadVideoInfo(queuedList, function (videos) {
+        showPlayList();
+    }
+    function showPlayList() {
+        var queuedList = window.getQueuedList();
+        loadVideoInfo(queuedList, function (videos) {
             recentVideosScope.videos = videos;
             loadPlayList();
         });
@@ -239,6 +244,9 @@ socket.on('controlling', function (data) {
                 callback(videos);
             });
         }        
+    }
+    window.onVideoEnd = function (videoId) {
+        showRelatedVideos(videoId);
     }
     function showRelatedVideos(videoId) {
         var relVideos = [],
