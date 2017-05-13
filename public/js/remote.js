@@ -105,16 +105,16 @@ window.onLoadCallback = function() {
             }
         });
     }
-    $("body").click(function (e) {
+    $("body").off("click").click(function (e) {
         if ($(".options .opt-list").has(e.target) && !$("#options").is(e.target)) {
             $(".options .opt-list").addClass("hide");
         }
     });
-    $("#playerControl").click(function () {
+    $("#playerControl").off("click").click(function () {
         $("#rplayer").removeClass("hide");
         $(".options .opt-list").addClass("hide");
     });
-    $("#options").click(function () {
+    $("#options").off("click").click(function () {
         $(".options .opt-list").toggleClass("hide");
     });
     if (window.io) {
@@ -139,7 +139,7 @@ window.onLoadCallback = function() {
                         }
                     }
                 });
-                $(".queue").on("click",function(){
+                $(".queue").off("click").on("click",function(){
                     var videoId = $(this).data('id');
                     if (videoId) {
                         if (videoId.indexOf("file") == -1) {
@@ -158,61 +158,80 @@ window.onLoadCallback = function() {
                     }
                 });
             }
-            $$(".r-container").tap(function () {
+            $$(".r-container").off("singleTap").on("singleTap", function (e) {
                 $(".r-container").addClass("hide");
-                socket.emit('controll',{action:"enter"}); 
+                socket.emit('controll',{action:"enter"});
+                deFreezeWindow();
+                e.preventDefault();
             });
-            $$(".r-container").swipeUp(function(){
-                socket.emit('controll',{action:"swipeUp"}); 
+            $$(".r-container").off("dobuleTap").on("dobuleTap", function (e) {
+                $(".r-container").addClass("hide");
+                deFreezeWindow();
+                e.preventDefault();
             });
-            $$(".r-container").swipeDown(function(){
+            $$(".r-container").off("swipeUp").on("swipeUp", function(e){
+                socket.emit('controll',{action:"swipeUp"});
+                e.preventDefault();
+            });
+            $$(".r-container").off("swipeDown").on("swipeDown", function(e){
                 socket.emit('controll',{action:"swipeDown"}); 
+                e.preventDefault();
             });
-            $$(".r-container").swipeLeft(function(){
+            $$(".r-container").off("swipeLeft").on("swipeLeft", function(e){
                 socket.emit('controll',{action:"swipeLeft"}); 
+                e.preventDefault();
             });
-            $$(".r-container").swipeRight(function(){
-                socket.emit('controll',{action:"swipeRight"}); 
+            $$(".r-container").off("swipeRight").on("swipeRight", function(e){
+                socket.emit('controll',{action:"swipeRight"});
+                e.preventDefault();
             });
             $(".player-qlist").off("click").on("click", function () {
                 $(".r-container").removeClass("hide");
+                freezeWindow();
                 socket.emit('controll',{action:"player-qlist"}); 
                 // $.getJSON("/getQueuedList", function(result){
                 //     //list videos
                 // });
             });
-            $$(".r-header").tap(function(){
-                // socket.emit('controll',{action:"tap"}); 
-                // $(".app-body").fadeToggle("fast", function () {});    
-                // $.get(host+'/omx/quit',function(data){
-                //     console.log(data);
-                // });
-            });
-            $$(".app-body").tap(function(){
-                // $.get(host+'/omx/pause',function(data){
-                //     console.log(data);
-                // });
-            });
+            function freezeWindow() {
+                window.scrollTo(0, 0);
+                $("body").css("overflow", "hidden");
+            }
+            function deFreezeWindow() {
+                $("body").css("overflow", "visible");
+            }
+            // $$(".r-header").tap(function(){
+            //     // socket.emit('controll',{action:"tap"}); 
+            //     // $(".app-body").fadeToggle("fast", function () {});    
+            //     // $.get(host+'/omx/quit',function(data){
+            //     //     console.log(data);
+            //     // });
+            // });
+            // $$(".app-body").tap(function(){
+            //     // $.get(host+'/omx/pause',function(data){
+            //     //     console.log(data);
+            //     // });
+            // });
             
-            $("#sdown").click(function () {
+            $("#sdown").off("click").click(function () {
                 if (confirm("Confirm Shutdown?")) {
                     socket.emit('controll',{action:"shutdown"}); 
                     $(".options .opt-list").addClass("hide");
                 }
             });
-            $("#fscreen").click(function () {
+            $("#fscreen").off("click").click(function () {
                  socket.emit('controll',{action:"fullscreen"}); 
             });
-            $("#reboot").click(function () {
+            $("#reboot").off("click").click(function () {
                 if (confirm("Confirm Reboot?")) {
                     socket.emit('controll',{action:"reboot"}); 
                     $(".options .opt-list").addClass("hide");
                 }
             });
-            $("#rplayer .close").click(function () {
+            $("#rplayer .close").off("click").click(function () {
                 $("#rplayer").addClass("hide");    
             });
-            $(".player-pause").click(function () {
+            $(".player-pause").off("click").click(function () {
                  if (playFlag) {
                     playFlag = false;
                     socket.emit('controll',{action:"player-pause"}); 
@@ -223,7 +242,7 @@ window.onLoadCallback = function() {
                     $(".player-pause").html("Pause");
                  }
             });
-            $(".player-stop").click(function () {
+            $(".player-stop").off("click").click(function () {
                  socket.emit('controll',{action:"player-stop"}); 
                  $("#rplayer").addClass("hide");    
             });
@@ -276,7 +295,7 @@ window.onLoadCallback = function() {
                 clock = false;
             });
 
-            $(".player-mute").click(function () {
+            $(".player-mute").off("click").click(function () {
                 var muteButton = $(".player-mute");
                 if (muteButton.html() == "Mute") { 
                     muteButton.html("Un Mute");

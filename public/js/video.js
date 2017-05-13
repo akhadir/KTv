@@ -18,7 +18,7 @@
             videoId: window.videoId, //'M7lc1UVf-VE',
             playerVars: {
                 autoplay: 1,
-                enablejsapi: 0,
+                enablejsapi: 1,
                 loop: 1,
                 html5: 1,
                 controls: 0,
@@ -27,6 +27,7 @@
                 rel: 1,
                 iv_load_policy: 3,
                 disablekb: 0,
+                origin: "http://localhost:8080/"
                 vq: "medium"
             },
             events: {
