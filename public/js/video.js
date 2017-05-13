@@ -27,7 +27,7 @@
                 rel: 1,
                 iv_load_policy: 3,
                 disablekb: 0,
-                origin: "http://localhost:8080/"
+                origin: "http://localhost:8080/",
                 vq: "medium"
             },
             events: {
@@ -43,6 +43,7 @@
     }
 
     function onPlayerReady(event) {
+        event.target.setVolume(50);
         event.target.playVideo();
     }
 
