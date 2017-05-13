@@ -244,15 +244,15 @@ io.sockets.on('connection', function (socket) {
             playPID = null;
             var id = data.video_id,
                 url = "http://www.youtube.com/watch?v=" + id;
-            ss.emit("controlling", {
-                action: "player-stop"
-            });
-            setTimeout(function () {
+            // ss.emit("controlling", {
+            //     action: "player-stop"
+            // });
+            // setTimeout(function () {
                 ss.emit("controlling", {
                     action: "playVideo",
                     id: id
                 });
-            }, 2000);
+            // }, 2000);
         } else if (data.action === "playList") {
             ss.emit("controlling", {
                 action: "playVideoList",
